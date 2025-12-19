@@ -2,22 +2,30 @@ import os
 import json
 import pygame
 import threading
-import traceback
 import queue
-from download import download_file
+from joy_config import get_mapping_value, log_message
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 JSON_FILE = os.path.join(BASE_DIR, "josn", "Nintendo Entertainment System.json")
 SAVE_DIR = "/userdata/roms/nes/"
 
+# 确保下载目录存在
 if not os.path.exists(SAVE_DIR):
-    os.makedirs(SAVE_DIR)
+    try:
+        os.makedirs(SAVE_DIR)
+    except Exception as e:
+        log_message(f"错误: 无法创建下载目录 {SAVE_DIR} - {str(e)}")
 
-# 加载游戏数据
+# === 加载数据 ===
 try:
-    with open(JSON_FILE, "r", encoding="utf-8") as f:
-        raw_games = json.load(f)
-except Exception:
+    if os.path.exists(JSON_FILE):
+        with open(JSON_FILE, "r", encoding="utf-8") as f:
+            raw_games = json.load(f)
+    else:
+        log_message(f"错误: 找不到数据文件 {JSON_FILE}")
+        raw_games = []
+except Exception as e:
+    log_message(f"错误: 解析 JSON 文件失败 - {str(e)}")
     raw_games = []
 
 menu_items = []
@@ -27,163 +35,158 @@ for g in raw_games:
         "name": filename.replace(".zip", ""),
         "filename": filename,
         "url": g[1],
-        "status": "已完成" if os.path.exists(os.path.join(SAVE_DIR, filename)) else "未下载"
+        "status": "已完成" if os.path.exists(os.path.join(SAVE_DIR, filename)) else "未下载",
+        "progress": 0
     })
 
+# === 下载线程池逻辑 ===
 download_queue = queue.Queue()
-_worker_init = False
+_worker_started = False
 
-def download_task():
+def download_worker():
     while True:
         item = download_queue.get()
-        if item is None:
-            break
+        if item is None: break
         try:
-            item["status"] = "下载中..."
-            print("开始下载:", item["name"], item["url"])
-            download_file(item["name"], item["url"], SAVE_DIR, progress_dict=item)
-            item["status"] = "已完成" if os.path.exists(os.path.join(SAVE_DIR, item["filename"])) else "下载失败"
+            # 动态导入下载脚本
+            from download import download_file
+            res = download_file(item["name"], item["url"], SAVE_DIR, progress_dict=item)
+            if res == "failed":
+                log_message(f"下载失败: 游戏 {item['name']} URL: {item['url']}")
         except Exception as e:
-            print("下载错误:", e)
-            item["status"] = "下载错误"
+            item["status"] = "下载出错"
+            log_message(f"下载模块调用异常: {str(e)}")
         download_queue.task_done()
 
-def start_worker():
-    global _worker_init
-    if not _worker_init:
-        for _ in range(4):
-            threading.Thread(target=download_task, daemon=True).start()
-        _worker_init = True
+def start_download_threads():
+    global _worker_started
+    if not _worker_started:
+        for _ in range(3): # 开启3个并发下载线程
+            t = threading.Thread(target=download_worker, daemon=True)
+            t.start()
+        _worker_started = True
 
+# === 内部判定函数 (移除正常日志) ===
 def is_confirm_act(event):
     if event.type == pygame.KEYDOWN:
-        return event.key in [pygame.K_RETURN, pygame.K_SPACE, pygame.K_KP_ENTER]
+        return event.key in [pygame.K_RETURN, pygame.K_SPACE]
     if event.type == pygame.JOYBUTTONDOWN:
-        return event.button in [1, 2]
+        # 基于您的测试日志，ID 0 和 2 均作为确认
+        return event.button in [0, 2]
     return False
 
 def is_back_act(event):
     if event.type == pygame.KEYDOWN:
         return event.key == pygame.K_ESCAPE
     if event.type == pygame.JOYBUTTONDOWN:
-        return event.button in [0, 3]
+        # 基于您的测试日志，ID 1 和 3 均作为返回
+        return event.button in [1, 3, 15]
     return False
 
-def game_menu(screen, font):
-    pygame.event.clear()
-    start_worker()
+# === 商城主页面 ===
+def game_menu(screen, font, active_mappings):
+    start_download_threads()
+    sw, sh = screen.get_size()
     
-    screen_width, screen_height = screen.get_size()
-
-    FONT_SIZE = 36
-    LINE_HEIGHT = 56
+    # UI 渲染参数
+    FONT_SIZE, LINE_HEIGHT = 36, 56
     LEFT_MARGIN, RIGHT_MARGIN = 120, 120
     TOP_MARGIN, BOTTOM_MARGIN = 80, 100
-    HIGHLIGHT_PAD_Y = 8
-    HIGHLIGHT_PAD_X = 20
-    BORDER_RADIUS = 20   # 固定圆角半径
+    HIGHLIGHT_PAD_Y, HIGHLIGHT_PAD_X = 8, 20
+    BORDER_RADIUS = 20
 
-    available_height = screen_height - TOP_MARGIN - BOTTOM_MARGIN
-    ITEMS_PER_PAGE = max(1, available_height // LINE_HEIGHT)
+    available_h = sh - TOP_MARGIN - BOTTOM_MARGIN
+    ITEMS_PER_PAGE = max(1, available_h // LINE_HEIGHT)
     total_pages = max(1, (len(menu_items) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE)
 
-    current_page = 0
-    selected_index = 0
-
+    cur_page, sel_idx = 0, 0
+    
+    # 字体加载
     font_path = os.path.join(BASE_DIR, "fonts", "NotoSansSC-Regular.ttf")
-    game_font = pygame.font.Font(font_path, FONT_SIZE) if os.path.isfile(font_path) else pygame.font.SysFont("simhei", FONT_SIZE)
-    hint_font = pygame.font.Font(font_path, 28) if os.path.isfile(font_path) else pygame.font.SysFont("simhei", 28)
-
-    font_height = game_font.get_height()
+    g_font = pygame.font.Font(font_path, FONT_SIZE) if os.path.exists(font_path) else pygame.font.SysFont("simhei", FONT_SIZE)
+    h_font = pygame.font.Font(font_path, 24) if os.path.exists(font_path) else pygame.font.SysFont("simhei", 24)
+    
     clock = pygame.time.Clock()
 
     while True:
-        try:
-            screen.fill((20, 20, 30))
-            start_idx = current_page * ITEMS_PER_PAGE
-            page_data = menu_items[start_idx:start_idx + ITEMS_PER_PAGE]
+        screen.fill((20, 20, 30))
+        start_i = cur_page * ITEMS_PER_PAGE
+        page_data = menu_items[start_i : start_i + ITEMS_PER_PAGE]
 
-            for i, item in enumerate(page_data):
-                row_top = TOP_MARGIN + i * LINE_HEIGHT
-                text_y = row_top + (LINE_HEIGHT - font_height) // 2
+        for i, item in enumerate(page_data):
+            row_top = TOP_MARGIN + i * LINE_HEIGHT
+            text_y = row_top + (LINE_HEIGHT - g_font.get_height()) // 2
+            
+            if i == sel_idx:
+                # 绘制高亮背景
+                rect_h = g_font.get_height() + 2 * HIGHLIGHT_PAD_Y
+                rect_w = sw - LEFT_MARGIN - RIGHT_MARGIN + 2 * HIGHLIGHT_PAD_X
+                rect_x, rect_y = LEFT_MARGIN - HIGHLIGHT_PAD_X, text_y - HIGHLIGHT_PAD_Y
+                
+                # 1. 阴影层 (完全还原 Offset 3,3)
+                shadow = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
+                pygame.draw.rect(shadow, (0, 0, 0, 100), shadow.get_rect(), border_radius=BORDER_RADIUS)
+                screen.blit(shadow, (rect_x + 3, rect_y + 3))
+                
+                # 2. 渐变层
+                grad = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
+                for gy in range(rect_h):
+                    alpha = int(180 - (gy/rect_h)*80)
+                    pygame.draw.rect(grad, (40, 70, 120, alpha), (0, gy, rect_w, 1), border_radius=BORDER_RADIUS)
+                screen.blit(grad, (rect_x, rect_y))
 
-                name_color = (255, 255, 255) if i == selected_index else (220, 220, 220)
-                name_surf = game_font.render(item["name"], True, name_color)
+            # 渲染游戏名称
+            n_color = (255, 255, 255) if i == sel_idx else (200, 200, 200)
+            n_surf = g_font.render(item["name"], True, n_color)
+            screen.blit(n_surf, (LEFT_MARGIN, text_y))
+            
+            # 渲染状态和百分比
+            display_status = item["status"]
+            if display_status == "下载中..." and item["progress"] > 0:
+                display_status = f"下载中 {int(item['progress'] * 100)}%"
 
-                status_color = (0, 255, 120) if item["status"] == "已完成" else \
-                               (255, 255, 80) if "下载中" in item["status"] else \
-                               (255, 100, 100) if "失败" in item["status"] or "错误" in item["status"] else \
-                               (180, 180, 180)
-                status_surf = game_font.render(item["status"], True, status_color)
+            s_color = (0, 255, 120) if item["status"] == "已完成" else \
+                      (255, 255, 80) if "下载中" in item["status"] else \
+                      (255, 100, 100) if "失败" in item["status"] else (150, 150, 150)
+            
+            s_surf = g_font.render(display_status, True, s_color)
+            screen.blit(s_surf, (sw - RIGHT_MARGIN - s_surf.get_width(), text_y))
 
-                if i == selected_index:
-                    rect_h = font_height + 2 * HIGHLIGHT_PAD_Y
-                    rect_y = text_y - HIGHLIGHT_PAD_Y
-                    rect_x = LEFT_MARGIN - HIGHLIGHT_PAD_X
-                    usable_w = screen_width - LEFT_MARGIN - RIGHT_MARGIN
-                    rect_w = usable_w + 2 * HIGHLIGHT_PAD_X
+        # 页脚信息
+        footer_str = f"Page {cur_page+1}/{total_pages}  |  方向键选择  A/Home 下载  B 返回上一级"
+        footer = h_font.render(footer_str, True, (150, 150, 170))
+        screen.blit(footer, (sw//2 - footer.get_width()//2, sh - 50))
 
-                    # 阴影层（圆角）
-                    shadow_rect = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
-                    pygame.draw.rect(shadow_rect, (0, 0, 0, 100), shadow_rect.get_rect(), border_radius=BORDER_RADIUS)
-                    screen.blit(shadow_rect, (rect_x + 3, rect_y + 3))
+        pygame.display.flip()
 
-                    # 渐变层（圆角）
-                    gradient_rect = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
-                    for y in range(rect_h):
-                        alpha = int(180 - (y / rect_h) * 80)
-                        pygame.draw.rect(gradient_rect, (40, 70, 120, alpha), (0, y, rect_w, 1), border_radius=BORDER_RADIUS)
-                    screen.blit(gradient_rect, (rect_x, rect_y))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return "exit"
 
-                screen.blit(name_surf, (LEFT_MARGIN, text_y))
-                screen.blit(status_surf, (screen_width - RIGHT_MARGIN - status_surf.get_width(), text_y))
-
-            title = hint_font.render(f"NES 游戏商城  -  第 {current_page + 1}/{total_pages} 页", True, (160, 200, 255))
-            screen.blit(title, (screen_width // 2 - title.get_width() // 2, 30))
-            hint = hint_font.render("↑↓ 选择   A 下载   B 返回   ←→ 翻页", True, (200, 200, 220))
-            screen.blit(hint, (screen_width // 2 - hint.get_width() // 2, screen_height - 60))
-
-            pygame.display.flip()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    return "exit"
-
-                if is_confirm_act(event):
-                    idx = current_page * ITEMS_PER_PAGE + selected_index
-                    if idx < len(menu_items) and menu_items[idx]["status"] == "未下载":
-                        download_queue.put(menu_items[idx])
-                    continue
-
-                if is_back_act(event):
-                    return "back"
-
-                elif event.type == pygame.KEYDOWN:
-                    if event.key in [pygame.K_UP, pygame.K_w] and selected_index > 0:
-                        selected_index -= 1
-                    elif event.key in [pygame.K_DOWN, pygame.K_s] and selected_index < len(page_data) - 1:
-                        selected_index += 1
-                    elif event.key in [pygame.K_LEFT, pygame.K_a] and current_page > 0:
-                        current_page -= 1
-                        selected_index = 0
-                    elif event.key in [pygame.K_RIGHT, pygame.K_d] and current_page < total_pages - 1:
-                        current_page += 1
-                        selected_index = 0
-                elif event.type == pygame.JOYHATMOTION:
-                    hx, hy = event.value
-                    if hy == 1 and selected_index > 0:
-                        selected_index -= 1
-                    elif hy == -1 and selected_index < len(page_data) - 1:
-                        selected_index += 1
-                    elif hx == -1 and current_page > 0:
-                        current_page -= 1
-                        selected_index = 0
-                    elif hx == 1 and current_page < total_pages - 1:
-                        current_page += 1
-                        selected_index = 0
-
-        except Exception:
-            print(traceback.format_exc())
-            return "back"
+            # 确认下载 (无正常日子记录)
+            if is_confirm_act(event):
+                idx = cur_page * ITEMS_PER_PAGE + sel_idx
+                if idx < len(menu_items) and menu_items[idx]["status"] == "未下载":
+                    download_queue.put(menu_items[idx])
+            
+            # 返回上一级
+            elif is_back_act(event):
+                pygame.event.clear()
+                return "back"
+            
+            # 导航逻辑
+            elif event.type == pygame.KEYDOWN:
+                if event.key in [pygame.K_UP, pygame.K_w] and sel_idx > 0: sel_idx -= 1
+                elif event.key in [pygame.K_DOWN, pygame.K_s] and sel_idx < len(page_data)-1: sel_idx += 1
+                elif event.key in [pygame.K_LEFT, pygame.K_a] and cur_page > 0: 
+                    cur_page -= 1; sel_idx = 0
+                elif event.key in [pygame.K_RIGHT, pygame.K_d] and cur_page < total_pages-1: 
+                    cur_page += 1; sel_idx = 0
+            
+            elif event.type == pygame.JOYHATMOTION:
+                if event.value[1] == 1 and sel_idx > 0: sel_idx -= 1
+                elif event.value[1] == -1 and sel_idx < len(page_data)-1: sel_idx += 1
+                elif event.value[0] == -1 and cur_page > 0: cur_page -= 1; sel_idx = 0
+                elif event.value[0] == 1 and cur_page < total_pages-1: cur_page += 1; sel_idx = 0
 
         clock.tick(60)
