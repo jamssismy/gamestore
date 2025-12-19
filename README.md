@@ -17,7 +17,7 @@
 请确保你的系统已联网，并在终端（Terminal/SSH）中执行以下命令：
 
 ```bash
-curl -L [https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh](https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh) | bash
+curl -L https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh | bash
 ```
 
 方法二：手动安装
