@@ -1,12 +1,31 @@
-# gamestore
-这是一个复古游戏安装程序，可以在系统当中构建一个 game store 的选项。并在该选项分类下生成一个 NES 的程序。进入程序可下载一万多款NES复古游戏，并自动安装到模拟器的NES分类下。需手动更新游戏列表，NES分类下游戏就会出现。
+# Retro Game Store 安装指南
 
-安装方法：
+这是一个为复古游戏系统定制的扩展程序。安装后，系统菜单将新增一个 **Game Store** 选项。通过该选项进入 NES 专区，你可以浏览并下载一万多款经典的 NES 游戏。下载完成后，游戏会自动安装至模拟器的相应分类下。
 
-一键安装命令： curl -L https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh | bash
+---
 
-手动安装：
+## 🚀 核心功能
+* **无缝集成**：在系统界面中直接构建 Game Store 入口。
+* **海量资源**：支持一键获取 10,000+ 款 NES 复古游戏。
+* **自动部署**：游戏下载后自动配置到模拟器路径，无需手动搬运。
 
-下载完整程序压缩包，解压后将 "es_systems_gamestore.cfg" 文件放入 "/userdata/system/configs/emulationstation/" 文件夹。 
-在 "/userdata/roms/" 文件夹内创建 "gamestore" 文件夹，将解压包内 NES 文件夹放入 "/userdata/roms/gamestore/" 文件夹内。
-手动更新游戏列表即可。
+---
+
+## 🛠️ 安装方法
+
+### 方法一：一键安装（推荐）
+请确保你的系统已联网，并在终端（Terminal/SSH）中执行以下命令：
+
+```bash
+curl -L [https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh](https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh) | bash
+
+方法二：手动安装
+下载并解压：下载完整程序压缩包。
+
+1.配置文件：将 es_systems_gamestore.cfg 放入以下路径： /userdata/system/configs/emulationstation/
+
+2.创建目录：在 /userdata/roms/ 内新建 gamestore 文件夹。
+
+3.放置资源：将解压包内的 NES 文件夹放入： /userdata/roms/gamestore/
+
+4.更新列表：返回系统界面，执行 “手动更新游戏列表” 即可。
