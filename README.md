@@ -16,9 +16,9 @@
 ### 方法一：一键安装（推荐）
 请确保你的系统已联网，并在终端（Terminal/SSH）中执行以下命令：
 
-bash
+```bash
 curl -L [https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh](https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh) | bash
-bash
+
 
 方法二：手动安装
 下载并解压：下载完整程序压缩包。
