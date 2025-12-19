@@ -18,6 +18,7 @@
 
 ```bash
 curl -L [https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh](https://raw.githubusercontent.com/jamssismy/gamestore/main/install.sh) | bash
+```bash
 
 方法二：手动安装
 下载并解压：下载完整程序压缩包。
