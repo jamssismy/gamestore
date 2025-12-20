@@ -6,40 +6,8 @@ import queue
 from joy_config import get_mapping_value, log_message
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-JSON_FILE = os.path.join(BASE_DIR, "josn", "Nintendo Entertainment System.json")
-SAVE_DIR = "/userdata/roms/nes/"
 
-# 确保下载目录存在
-if not os.path.exists(SAVE_DIR):
-    try:
-        os.makedirs(SAVE_DIR)
-    except Exception as e:
-        log_message(f"错误: 无法创建下载目录 {SAVE_DIR} - {str(e)}")
-
-# === 加载数据 ===
-try:
-    if os.path.exists(JSON_FILE):
-        with open(JSON_FILE, "r", encoding="utf-8") as f:
-            raw_games = json.load(f)
-    else:
-        log_message(f"错误: 找不到数据文件 {JSON_FILE}")
-        raw_games = []
-except Exception as e:
-    log_message(f"错误: 解析 JSON 文件失败 - {str(e)}")
-    raw_games = []
-
-menu_items = []
-for g in raw_games:
-    filename = g[0]
-    menu_items.append({
-        "name": filename.replace(".zip", ""),
-        "filename": filename,
-        "url": g[1],
-        "status": "已完成" if os.path.exists(os.path.join(SAVE_DIR, filename)) else "未下载",
-        "progress": 0
-    })
-
-# === 下载线程池逻辑 ===
+# === 下载线程池逻辑 (严格保留) ===
 download_queue = queue.Queue()
 _worker_started = False
 
@@ -48,9 +16,9 @@ def download_worker():
         item = download_queue.get()
         if item is None: break
         try:
-            # 动态导入下载脚本
             from download import download_file
-            res = download_file(item["name"], item["url"], SAVE_DIR, progress_dict=item)
+            # 使用 item 字典中的 save_dir 参数实现动态路径
+            res = download_file(item["name"], item["url"], item["save_dir"], progress_dict=item)
             if res == "failed":
                 log_message(f"下载失败: 游戏 {item['name']} URL: {item['url']}")
         except Exception as e:
@@ -61,17 +29,16 @@ def download_worker():
 def start_download_threads():
     global _worker_started
     if not _worker_started:
-        for _ in range(3): # 开启3个并发下载线程
+        for _ in range(3): 
             t = threading.Thread(target=download_worker, daemon=True)
             t.start()
         _worker_started = True
 
-# === 内部判定函数 (移除正常日志) ===
+# === 内部判定函数 (严格保留) ===
 def is_confirm_act(event):
     if event.type == pygame.KEYDOWN:
         return event.key in [pygame.K_RETURN, pygame.K_SPACE]
     if event.type == pygame.JOYBUTTONDOWN:
-        # 基于您的测试日志，ID 0 和 2 均作为确认
         return event.button in [0, 2]
     return False
 
@@ -79,16 +46,44 @@ def is_back_act(event):
     if event.type == pygame.KEYDOWN:
         return event.key == pygame.K_ESCAPE
     if event.type == pygame.JOYBUTTONDOWN:
-        # 基于您的测试日志，ID 1 和 3 均作为返回
         return event.button in [1, 3, 15]
     return False
 
-# === 商城主页面 ===
-def game_menu(screen, font, active_mappings):
+# === 商城主页面 (接收 5 个动态参数) ===
+def game_menu(screen, font, active_mappings, json_file, save_dir):
     start_download_threads()
     sw, sh = screen.get_size()
     
-    # UI 渲染参数
+    # 确保传入的下载目录存在
+    if not os.path.exists(save_dir):
+        try: os.makedirs(save_dir)
+        except Exception as e: log_message(f"错误: 无法创建目录 {save_dir} - {str(e)}")
+
+    # === 动态加载数据 (基于传入的 json_file) ===
+    menu_items = []
+    try:
+        if os.path.exists(json_file):
+            with open(json_file, "r", encoding="utf-8") as f:
+                raw_games = json.load(f)
+                for g in raw_games:
+                    filename = g[0]
+                    menu_items.append({
+                        "name": filename.replace(".zip", ""),
+                        "filename": filename,
+                        "url": g[1],
+                        "save_dir": save_dir, # 关键：保存路径存入 item
+                        "status": "已完成" if os.path.exists(os.path.join(save_dir, filename)) else "未下载",
+                        "progress": 0
+                    })
+        else:
+            log_message(f"错误: 找不到数据文件 {json_file}")
+    except Exception as e:
+        log_message(f"错误: 解析 JSON 失败 - {str(e)}")
+
+    if not menu_items:
+        menu_items = [{"name": "无游戏数据", "status": "", "url": None}]
+
+    # UI 渲染参数 (完全保留原始 UI)
     FONT_SIZE, LINE_HEIGHT = 36, 56
     LEFT_MARGIN, RIGHT_MARGIN = 120, 120
     TOP_MARGIN, BOTTOM_MARGIN = 80, 100
@@ -101,7 +96,6 @@ def game_menu(screen, font, active_mappings):
 
     cur_page, sel_idx = 0, 0
     
-    # 字体加载
     font_path = os.path.join(BASE_DIR, "fonts", "NotoSansSC-Regular.ttf")
     g_font = pygame.font.Font(font_path, FONT_SIZE) if os.path.exists(font_path) else pygame.font.SysFont("simhei", FONT_SIZE)
     h_font = pygame.font.Font(font_path, 24) if os.path.exists(font_path) else pygame.font.SysFont("simhei", 24)
@@ -118,29 +112,25 @@ def game_menu(screen, font, active_mappings):
             text_y = row_top + (LINE_HEIGHT - g_font.get_height()) // 2
             
             if i == sel_idx:
-                # 绘制高亮背景
+                # 绘制高亮背景 (保留阴影和渐变)
                 rect_h = g_font.get_height() + 2 * HIGHLIGHT_PAD_Y
                 rect_w = sw - LEFT_MARGIN - RIGHT_MARGIN + 2 * HIGHLIGHT_PAD_X
                 rect_x, rect_y = LEFT_MARGIN - HIGHLIGHT_PAD_X, text_y - HIGHLIGHT_PAD_Y
                 
-                # 1. 阴影层 (完全还原 Offset 3,3)
                 shadow = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
                 pygame.draw.rect(shadow, (0, 0, 0, 100), shadow.get_rect(), border_radius=BORDER_RADIUS)
                 screen.blit(shadow, (rect_x + 3, rect_y + 3))
                 
-                # 2. 渐变层
                 grad = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
                 for gy in range(rect_h):
                     alpha = int(180 - (gy/rect_h)*80)
                     pygame.draw.rect(grad, (40, 70, 120, alpha), (0, gy, rect_w, 1), border_radius=BORDER_RADIUS)
                 screen.blit(grad, (rect_x, rect_y))
 
-            # 渲染游戏名称
             n_color = (255, 255, 255) if i == sel_idx else (200, 200, 200)
             n_surf = g_font.render(item["name"], True, n_color)
             screen.blit(n_surf, (LEFT_MARGIN, text_y))
             
-            # 渲染状态和百分比
             display_status = item["status"]
             if display_status == "下载中..." and item["progress"] > 0:
                 display_status = f"下载中 {int(item['progress'] * 100)}%"
@@ -152,7 +142,7 @@ def game_menu(screen, font, active_mappings):
             s_surf = g_font.render(display_status, True, s_color)
             screen.blit(s_surf, (sw - RIGHT_MARGIN - s_surf.get_width(), text_y))
 
-        # 页脚信息
+        # 页脚
         footer_str = f"Page {cur_page+1}/{total_pages}  |  方向键选择  A/Home 下载  B 返回上一级"
         footer = h_font.render(footer_str, True, (150, 150, 170))
         screen.blit(footer, (sw//2 - footer.get_width()//2, sh - 50))
@@ -160,21 +150,17 @@ def game_menu(screen, font, active_mappings):
         pygame.display.flip()
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return "exit"
+            if event.type == pygame.QUIT: return "exit"
 
-            # 确认下载 (无正常日子记录)
             if is_confirm_act(event):
                 idx = cur_page * ITEMS_PER_PAGE + sel_idx
                 if idx < len(menu_items) and menu_items[idx]["status"] == "未下载":
                     download_queue.put(menu_items[idx])
             
-            # 返回上一级
             elif is_back_act(event):
                 pygame.event.clear()
                 return "back"
             
-            # 导航逻辑
             elif event.type == pygame.KEYDOWN:
                 if event.key in [pygame.K_UP, pygame.K_w] and sel_idx > 0: sel_idx -= 1
                 elif event.key in [pygame.K_DOWN, pygame.K_s] and sel_idx < len(page_data)-1: sel_idx += 1

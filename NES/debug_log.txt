@@ -82,3 +82,5 @@
 [2025-12-19 13:53:05] 下载失败: 游戏 240p Test Suite (World) (v0.12) (UNROM) (Program) (Aftermarket) (Unl) URL: https://myrient.erista.me/files/No-Intro/Nintendo%20-%20Nintendo%20Entertainment%20System%20%28Headered%29/240p%20Test%20Suite%20%28World%29%20%28v0.12%29%20%28UNROM%29%20%28Program%29%20%28Aftermarket%29%20%28Unl%29.zip
 [2025-12-19 13:53:18] 下载失败: 游戏 52-in-1 (Asia) (En) (Pirate) URL: https://myrient.erista.me/files/No-Intro/Nintendo%20-%20Nintendo%20Entertainment%20System%20%28Headered%29/52-in-1%20%28Asia%29%20%28En%29%20%28Pirate%29.zip
 [2025-12-19 14:15:25] 下载失败: 游戏 Abadox (Japan) URL: https://myrient.erista.me/files/No-Intro/Nintendo%20-%20Nintendo%20Entertainment%20System%20%28Headered%29/Abadox%20%28Japan%29.zip
+[2025-12-20 13:53:29] 错误: 找不到数据文件 /userdata/roms/gamestore/nes/json/Game Boy Color.json
+[2025-12-20 13:53:39] 错误: 找不到数据文件 /userdata/roms/gamestore/nes/json/Game Boy Color.json
