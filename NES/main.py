@@ -64,7 +64,9 @@ GAME_CONFIGS = [
     {"name": "GBA模拟游戏", "image": "Game Boy.png", "json": "Game Boy.json", "path": "/userdata/roms/gba/"},
     {"name": "PS1经典游戏", "image": "Sony Playstation.png", "json": "Sony Playstation.json", "path": "/userdata/roms/psx/"},
     {"name": "PSP掌机游戏", "image": "Sony PSP.png", "json": "Sony PSP.json", "path": "/userdata/roms/psp/"},
-    {"name": "SNES超任", "image": "Super Nintendo Entertainment System.png", "json": "Super Nintendo Entertainment System.json", "path": "/userdata/roms/snes/"}
+    {"name": "PC Engine 游戏", "image": "NEC PC Engine.png", "json": "NEC PC Engine.json", "path": "/userdata/roms/pcengine/"},
+    {"name": "PS2经典游戏", "image": "Sony Playstation 2.png", "json": "Sony Playstation 2.json", "path": "/userdata/roms/ps2/"},
+    {"name": "Sega 八位机", "image": "Sega Mark III.png", "json": "Sega Mark III.json", "path": "/userdata/roms/mastersystem/"}
 ]
 
 for config in GAME_CONFIGS:
