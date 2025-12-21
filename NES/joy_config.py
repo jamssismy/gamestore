@@ -1,25 +1,41 @@
-import os
 import pygame
+import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
 LOG_FILE = "/userdata/roms/gamestore/nes/debug_log.txt"
 
 def log_message(msg):
-    """仅用于记录严重错误"""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     full_msg = f"[{timestamp}] {msg}"
     print(full_msg)
     try:
         log_dir = os.path.dirname(LOG_FILE)
-        if not os.path.exists(log_dir): os.makedirs(log_dir)
-        with open(LOG_FILE, "a", encoding="utf-8") as f: f.write(full_msg + "\n")
-    except: pass
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(full_msg + "\n")
+    except:
+        pass
 
+# 新增：安全加载手柄数据库
+def load_controller_db():
+    db_path = "/usr/share/sdl-jstest/gamecontrollerdb.txt"
+    if os.path.exists(db_path):
+        try:
+            os.environ['SDL_GAMECONTROLLERCONFIG_FILE'] = db_path
+            log_message(f"手柄数据库加载成功: {db_path}")
+            log_message("手柄兼容性已提升（数据库映射优先于ES配置）")
+        except Exception as e:
+            log_message(f"加载手柄数据库失败: {e}")
+    else:
+        log_message("未找到 gamecontrollerdb.txt，使用原始ES配置")
+
+# 原始函数：解析ES输入配置
 def load_active_mappings():
-    # 移除“开始初始化”日志
+    load_controller_db()  # 新增：在解析前先加载数据库
+
     cfg_path = "/userdata/system/configs/emulationstation/es_input.cfg"
-    
     all_configs = {}
     if os.path.exists(cfg_path):
         try:
@@ -32,7 +48,6 @@ def load_active_mappings():
                     for input_tag in config.findall('input')
                 }
         except Exception as e:
-            # 保留关键错误日志
             log_message(f"配置文件解析失败: {str(e)}")
 
     active_maps = {}
@@ -40,37 +55,33 @@ def load_active_mappings():
     for i in range(joy_count):
         try:
             j = pygame.joystick.Joystick(i)
-            if not j.get_init(): j.init()
+            if not j.get_init():
+                j.init()
             raw_name = j.get_name().strip().lower()
             
-            # 1. 检查 XML 匹配
             if raw_name in all_configs:
                 active_maps[i] = all_configs[raw_name]
-            
-            # 2. 针对 Pro Controller 的静默修正
             elif "pro controller" in raw_name:
                 active_maps[i] = {
-                    'a': {'id': 0},       # A键
-                    'b': {'id': 1},       # B键
-                    'confirm_alt': 2,     # Home键补丁
-                    'up': {'id': 1},      # 轴
-                    'left': {'id': 0}     # 轴
+                    'a': {'id': 0},
+                    'b': {'id': 1},
+                    'confirm_alt': 2,
+                    'up': {'id': 1, 'type': 'hat'},
+                    'left': {'id': 0, 'type': 'hat'}
                 }
             else:
-                # 其他手柄默认值
                 active_maps[i] = {'a': {'id': 0}, 'b': {'id': 1}}
         except Exception as e:
             log_message(f"手柄设备 [{i}] 加载异常: {str(e)}")
             
     return active_maps
 
+# 原始函数：获取映射值
 def get_mapping_value(active_mappings, joy_id, key_name, default_id):
     if joy_id in active_mappings:
         conf = active_mappings[joy_id]
-        # 支持多键位判定逻辑
         if key_name == 'a' and 'confirm_alt' in conf:
             return [conf['a']['id'], conf['confirm_alt']]
-        
         if key_name in conf:
             return conf[key_name].get('id')
     return default_id
