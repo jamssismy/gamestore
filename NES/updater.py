@@ -1,23 +1,21 @@
 import os
 import requests
-import json
 import zipfile
 import shutil
+import time # 新增：用于生成随机时间戳
 from joy_config import log_message
 
-# 配置信息
-GITHUB_USER = "jamssismy"
-GITHUB_REPO = "gamestore"
+# 核心路径
 BASE_DIR = "/userdata/roms/gamestore/nes"
+TEMP_DIR = os.path.join(BASE_DIR, "__pycache__")
 VERSION_FILE = os.path.join(BASE_DIR, "version.txt")
 
-# GitHub Raw 链接（获取版本 JSON）
-UPDATE_JSON_URL = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/update.json"
-# 备用加速链接 (如果原生链接不通，可以切换到这个)
-UPDATE_JSON_URL_BACKUP = f"https://fastly.jsdelivr.net/gh/{GITHUB_USER}/{GITHUB_REPO}@main/update.json"
+GITHUB_USER = "jamssismy"
+GITHUB_REPO = "gamestore"
+# 增加时间戳防止 CDN 缓存旧的 json 文件
+UPDATE_JSON_BASE = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/update.json"
 
 def get_local_version():
-    """读取本地 version.txt"""
     if os.path.exists(VERSION_FILE):
         try:
             with open(VERSION_FILE, "r") as f:
@@ -26,78 +24,69 @@ def get_local_version():
     return "v0.00"
 
 def check_update():
-    """
-    通过 GitHub 检查是否有新版本
-    返回: (是否有更新, 最新版本, 更新日志, 下载地址)
-    """
     try:
-        # 尝试从 GitHub 获取最新的 update.json
-        response = requests.get(UPDATE_JSON_URL, timeout=10)
-        if response.status_code != 200:
-            # 失败则尝试备份链接
-            response = requests.get(UPDATE_JSON_URL_BACKUP, timeout=10)
-            
+        # 在 URL 后加随机参数强制刷新缓存
+        nocache_url = f"{UPDATE_JSON_BASE}?t={int(time.time())}"
+        response = requests.get(nocache_url, timeout=10)
+        
         if response.status_code == 200:
             data = response.json()
-            remote_version = data.get("latest_version", "v1.00")
+            remote_ver = data.get("latest_version", "v1.00")
+            local_ver = get_local_version()
             
-            if remote_version != get_local_version():
-                return True, remote_version, data.get("changelog", ""), data.get("download_url", "")
+            # 只要字符串不一致就触发更新
+            if remote_ver != local_ver:
+                return True, remote_ver, data.get("changelog", ""), data.get("download_url", "")
     except Exception as e:
-        log_message(f"检查更新出错: {e}")
-        
+        log_message(f"检查更新失败: {e}")
     return False, None, None, None
 
-def execute_update(zip_url, progress_callback=None):
-    """
-    下载并安装更新
-    """
-    tmp_zip = os.path.join(BASE_DIR, "update_temp.zip")
-    extract_path = os.path.join(BASE_DIR, "update_extracted")
-    
+def execute_update(zip_url, remote_version):
+    # 强制清理并准备中转站
+    if os.path.exists(TEMP_DIR):
+        os.system(f"rm -rf {TEMP_DIR}")
+    os.makedirs(TEMP_DIR, exist_ok=True)
+
+    tmp_zip = os.path.join(TEMP_DIR, "update.zip")
+    extract_path = os.path.join(TEMP_DIR, "unpacked")
+
     try:
-        # 1. 下载 ZIP (GitHub 的 ZIP 归档链接)
-        response = requests.get(zip_url, stream=True, timeout=20)
-        total_size = int(response.headers.get('content-length', 0))
-        downloaded = 0
-        
+        # 1. 下载 (增加随机参数防止下载旧的 ZIP)
+        r = requests.get(f"{zip_url}?t={int(time.time())}", timeout=30)
         with open(tmp_zip, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
-                    downloaded += len(chunk)
-                    if progress_callback and total_size > 0:
-                        # 计算百分比传回 UI
-                        progress_callback(int(downloaded * 100 / total_size))
+            f.write(r.content)
 
         # 2. 解压
-        if os.path.exists(extract_path):
-            shutil.rmtree(extract_path)
         with zipfile.ZipFile(tmp_zip, 'r') as zip_ref:
             zip_ref.extractall(extract_path)
 
-        # 3. 覆盖文件 (简单方案：直接覆盖当前目录下的 py 文件)
-        # 注意：GitHub ZIP 里面通常会有一层目录名为 "gamestore-main"
-        inner_dir = os.path.join(extract_path, f"{GITHUB_REPO}-main")
-        if not os.path.exists(inner_dir):
-            # 如果不是 main 分支，可能是其他名字，遍历一下
-            dirs = [d for d in os.listdir(extract_path) if os.path.isdir(os.path.join(extract_path, d))]
-            if dirs: inner_dir = os.path.join(extract_path, dirs[0])
+        # 3. 定位 NES 文件夹
+        source_nes_dir = None
+        for root, dirs, files in os.walk(extract_path):
+            if os.path.basename(root).upper() == "NES":
+                source_nes_dir = root
+                break
 
-        for item in os.listdir(inner_dir):
-            s = os.path.join(inner_dir, item)
-            d = os.path.join(BASE_DIR, item)
+        if not source_nes_dir:
+            return False
+
+        # 4. 覆盖安装
+        for item in os.listdir(source_nes_dir):
+            if item == "version.txt": continue
+            s, d = os.path.join(source_nes_dir, item), os.path.join(BASE_DIR, item)
             if os.path.isdir(s):
                 if os.path.exists(d): shutil.rmtree(d)
                 shutil.copytree(s, d)
             else:
                 shutil.copy2(s, d)
 
-        # 4. 清理临时文件并保存新版本号
-        if os.path.exists(tmp_zip): os.remove(tmp_zip)
-        if os.path.exists(extract_path): shutil.rmtree(extract_path)
-        
+        # 5. 写入版本号
+        with open(VERSION_FILE, "w") as f:
+            f.write(remote_version)
+
+        # 6. 强制销毁中转站
+        os.system(f"rm -rf {TEMP_DIR}")
         return True
-    except Exception as e:
-        log_message(f"执行更新失败: {e}")
+    except:
+        os.system(f"rm -rf {TEMP_DIR}")
         return False
