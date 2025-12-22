@@ -85,3 +85,106 @@
 [2025-12-20 13:53:29] 错误: 找不到数据文件 /userdata/roms/gamestore/nes/json/Game Boy Color.json
 [2025-12-20 13:53:39] 错误: 找不到数据文件 /userdata/roms/gamestore/nes/json/Game Boy Color.json
 [2025-12-20 20:50:06] 错误: 找不到数据文件 /userdata/roms/gamestore/nes/json/NEC PC Engine.json
+[2025-12-22 10:10:52] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:10:52] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:12:50] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:12:50] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:26:18] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:26:18] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:26:19] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:26:19] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:26:30] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:26:30] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:26:32] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:26:32] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:26:44] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:26:44] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:26:57] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:26:57] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:27:08] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:27:08] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:27:46] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:27:46] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:27:48] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:27:48] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:27:52] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:27:52] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:27:57] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:27:57] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:28:03] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:28:03] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:28:09] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:28:09] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:28:18] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:28:18] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:28:24] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:28:24] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:28:42] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:28:42] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:28:53] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:28:53] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:29:06] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:29:06] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:29:16] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:29:16] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:29:26] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:29:26] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:29:28] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:29:28] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:29:32] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:29:32] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:30:04] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:30:04] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:34:42] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:34:42] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:34:44] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:34:44] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:34:55] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:34:55] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:34:57] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:34:57] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:35:01] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:35:01] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:35:37] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:35:37] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:35:46] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:35:46] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:36:17] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:36:17] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:36:19] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:36:19] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:39:33] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:39:33] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:39:35] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:39:35] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:39:45] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:39:45] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:42:08] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:42:08] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:42:09] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:42:09] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:42:18] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:42:18] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:42:33] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:42:33] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:45:15] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:45:15] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:45:48] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:45:48] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:45:50] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:45:50] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:45:55] 已清理缓存目录: /userdata/roms/gamestore/nes/__pycache__
+[2025-12-22 10:46:08] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:46:08] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:46:17] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:46:17] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:46:25] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:46:25] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:46:33] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:46:33] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 10:46:37] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 10:46:37] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 11:19:13] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 11:19:13] 手柄兼容性已提升（数据库映射优先于ES配置）
+[2025-12-22 11:19:15] 手柄数据库加载成功: /usr/share/sdl-jstest/gamecontrollerdb.txt
+[2025-12-22 11:19:15] 手柄兼容性已提升（数据库映射优先于ES配置）

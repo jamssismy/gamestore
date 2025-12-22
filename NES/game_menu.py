@@ -3,11 +3,10 @@ import json
 import pygame
 import threading
 import queue
-from joy_config import get_mapping_value, log_message
+from joy_config import get_mapping_value, log_message, load_active_mappings
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# === 下载线程池逻辑 (严格保留) ===
 download_queue = queue.Queue()
 _worker_started = False
 
@@ -17,7 +16,6 @@ def download_worker():
         if item is None: break
         try:
             from download import download_file
-            # 使用 item 字典中的 save_dir 参数实现动态路径
             res = download_file(item["name"], item["url"], item["save_dir"], progress_dict=item)
             if res == "failed":
                 log_message(f"下载失败: 游戏 {item['name']} URL: {item['url']}")
@@ -34,7 +32,6 @@ def start_download_threads():
             t.start()
         _worker_started = True
 
-# === 内部判定函数 (严格保留) ===
 def is_confirm_act(event):
     if event.type == pygame.KEYDOWN:
         return event.key in [pygame.K_RETURN, pygame.K_SPACE]
@@ -49,17 +46,18 @@ def is_back_act(event):
         return event.button in [1, 3, 15]
     return False
 
-# === 商城主页面 (接收 5 个动态参数) ===
 def game_menu(screen, font, active_mappings, json_file, save_dir):
     start_download_threads()
     sw, sh = screen.get_size()
     
-    # 确保传入的下载目录存在
+    # 手柄提示变量
+    notif_text = ""
+    notif_timer = 0
+    
     if not os.path.exists(save_dir):
         try: os.makedirs(save_dir)
         except Exception as e: log_message(f"错误: 无法创建目录 {save_dir} - {str(e)}")
 
-    # === 动态加载数据 (基于传入的 json_file) ===
     menu_items = []
     try:
         if os.path.exists(json_file):
@@ -71,7 +69,7 @@ def game_menu(screen, font, active_mappings, json_file, save_dir):
                         "name": filename.replace(".zip", ""),
                         "filename": filename,
                         "url": g[1],
-                        "save_dir": save_dir, # 关键：保存路径存入 item
+                        "save_dir": save_dir,
                         "status": "已完成" if os.path.exists(os.path.join(save_dir, filename)) else "未下载",
                         "progress": 0
                     })
@@ -83,7 +81,6 @@ def game_menu(screen, font, active_mappings, json_file, save_dir):
     if not menu_items:
         menu_items = [{"name": "无游戏数据", "status": "", "url": None}]
 
-    # UI 渲染参数 (完全保留原始 UI)
     FONT_SIZE, LINE_HEIGHT = 36, 56
     LEFT_MARGIN, RIGHT_MARGIN = 120, 120
     TOP_MARGIN, BOTTOM_MARGIN = 80, 100
@@ -95,11 +92,9 @@ def game_menu(screen, font, active_mappings, json_file, save_dir):
     total_pages = max(1, (len(menu_items) + ITEMS_PER_PAGE - 1) // ITEMS_PER_PAGE)
 
     cur_page, sel_idx = 0, 0
-    
     font_path = os.path.join(BASE_DIR, "fonts", "NotoSansSC-Regular.ttf")
     g_font = pygame.font.Font(font_path, FONT_SIZE) if os.path.exists(font_path) else pygame.font.SysFont("simhei", FONT_SIZE)
     h_font = pygame.font.Font(font_path, 24) if os.path.exists(font_path) else pygame.font.SysFont("simhei", 24)
-    
     clock = pygame.time.Clock()
 
     while True:
@@ -112,15 +107,12 @@ def game_menu(screen, font, active_mappings, json_file, save_dir):
             text_y = row_top + (LINE_HEIGHT - g_font.get_height()) // 2
             
             if i == sel_idx:
-                # 绘制高亮背景 (保留阴影和渐变)
                 rect_h = g_font.get_height() + 2 * HIGHLIGHT_PAD_Y
                 rect_w = sw - LEFT_MARGIN - RIGHT_MARGIN + 2 * HIGHLIGHT_PAD_X
                 rect_x, rect_y = LEFT_MARGIN - HIGHLIGHT_PAD_X, text_y - HIGHLIGHT_PAD_Y
-                
                 shadow = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
                 pygame.draw.rect(shadow, (0, 0, 0, 100), shadow.get_rect(), border_radius=BORDER_RADIUS)
                 screen.blit(shadow, (rect_x + 3, rect_y + 3))
-                
                 grad = pygame.Surface((rect_w, rect_h), pygame.SRCALPHA)
                 for gy in range(rect_h):
                     alpha = int(180 - (gy/rect_h)*80)
@@ -134,41 +126,55 @@ def game_menu(screen, font, active_mappings, json_file, save_dir):
             display_status = item["status"]
             if display_status == "下载中..." and item["progress"] > 0:
                 display_status = f"下载中 {int(item['progress'] * 100)}%"
-
             s_color = (0, 255, 120) if item["status"] == "已完成" else \
                       (255, 255, 80) if "下载中" in item["status"] else \
                       (255, 100, 100) if "失败" in item["status"] else (150, 150, 150)
-            
             s_surf = g_font.render(display_status, True, s_color)
             screen.blit(s_surf, (sw - RIGHT_MARGIN - s_surf.get_width(), text_y))
 
-        # 页脚
-        footer_str = f"Page {cur_page+1}/{total_pages}  |  方向键选择  A/Home 下载  B 返回上一级"
+        footer_str = f"Page {cur_page+1}/{total_pages}  |  方向键选择  A 下载  B 返回"
         footer = h_font.render(footer_str, True, (150, 150, 170))
         screen.blit(footer, (sw//2 - footer.get_width()//2, sh - 50))
+
+        # --- 子页面手柄提示框渲染 ---
+        if notif_text and pygame.time.get_ticks() - notif_timer < 3000:
+            msg_surf = h_font.render(notif_text, True, (255, 255, 255))
+            m_w, m_h = msg_surf.get_size()
+            m_rect = pygame.Rect(sw//2 - m_w//2 - 20, 20, m_w + 40, 50)
+            n_bg = pygame.Surface((m_rect.width, m_rect.height), pygame.SRCALPHA)
+            pygame.draw.rect(n_bg, (50, 100, 200, 200), (0, 0, m_rect.width, m_rect.height), border_radius=10)
+            screen.blit(n_bg, m_rect.topleft)
+            screen.blit(msg_surf, (m_rect.centerx - m_w//2, m_rect.centery - m_h//2))
 
         pygame.display.flip()
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT: return "exit"
+            # 新增手柄热插拔监听
+            if event.type == pygame.JOYDEVICEADDED:
+                try:
+                    joy = pygame.joystick.Joystick(event.device_index); joy.init()
+                    notif_text = f"已连接: {joy.get_name()}"; notif_timer = pygame.time.get_ticks()
+                    active_mappings = load_active_mappings()
+                except: pass
+            elif event.type == pygame.JOYDEVICEREMOVED:
+                notif_text = "手柄已断开连接"; notif_timer = pygame.time.get_ticks()
+                active_mappings = load_active_mappings()
 
+            if event.type == pygame.QUIT: return "exit"
             if is_confirm_act(event):
                 idx = cur_page * ITEMS_PER_PAGE + sel_idx
                 if idx < len(menu_items) and menu_items[idx]["status"] == "未下载":
                     download_queue.put(menu_items[idx])
-            
             elif is_back_act(event):
                 pygame.event.clear()
                 return "back"
-            
             elif event.type == pygame.KEYDOWN:
                 if event.key in [pygame.K_UP, pygame.K_w] and sel_idx > 0: sel_idx -= 1
                 elif event.key in [pygame.K_DOWN, pygame.K_s] and sel_idx < len(page_data)-1: sel_idx += 1
                 elif event.key in [pygame.K_LEFT, pygame.K_a] and cur_page > 0: 
                     cur_page -= 1; sel_idx = 0
-                elif event.key in [pygame.K_RIGHT, pygame.K_d] and cur_page < total_pages-1: 
+                elif event.key in [pygame.S_RIGHT, pygame.K_d] and cur_page < total_pages-1: 
                     cur_page += 1; sel_idx = 0
-            
             elif event.type == pygame.JOYHATMOTION:
                 if event.value[1] == 1 and sel_idx > 0: sel_idx -= 1
                 elif event.value[1] == -1 and sel_idx < len(page_data)-1: sel_idx += 1
