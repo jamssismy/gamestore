@@ -1,5 +1,5 @@
 {
-  "latest_version": "v1.02",
+  "latest_version": "v1.03",
   "download_url": "https://github.com/jamssismy/gamestore/archive/refs/heads/main.zip",
-  "changelog": "1. 修复菜单对齐\n2. 增加清理缓存功能\n3. 优化更新模块"
+  "changelog": "1. 修正游戏列表\n2. 修正GBA游戏\n3. 修正下载功能速度"
 }
