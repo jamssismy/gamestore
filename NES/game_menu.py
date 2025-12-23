@@ -57,7 +57,7 @@ def game_menu(screen, font, active_mappings, json_file, save_dir):
     if not os.path.exists(save_dir):
         try: os.makedirs(save_dir)
         except Exception as e: log_message(f"错误: 无法创建目录 {save_dir} - {str(e)}")
-        
+
     menu_items = []
     try:
         if os.path.exists(json_file):
@@ -72,8 +72,8 @@ def game_menu(screen, font, active_mappings, json_file, save_dir):
                     display_name = filename.replace(".zip", "")
                     
                     # 2. 这里的片段执行缩短逻辑 (新增部分)
-                    if len(display_name) > 20: 
-                        display_name = display_name[:18] + "..."
+                    if len(display_name) > 60: 
+                        display_name = display_name[:58] + "..."
                     
                     menu_items.append({
                         "name": display_name,  # 修改后的名字存入这里用于显示
