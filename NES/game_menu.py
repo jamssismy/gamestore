@@ -72,8 +72,8 @@ def game_menu(screen, font, active_mappings, json_file, save_dir):
                     display_name = filename.replace(".zip", "")
                     
                     # 2. 这里的片段执行缩短逻辑 (新增部分)
-                    if len(display_name) > 60: 
-                        display_name = display_name[:58] + "..."
+                    if len(display_name) > 70: 
+                        display_name = display_name[:68] + "..."
                     
                     menu_items.append({
                         "name": display_name,  # 修改后的名字存入这里用于显示

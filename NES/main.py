@@ -70,6 +70,7 @@ GAME_CONFIGS = [
     {"name": "SEGA世嘉游戏(16位)", "image": "Sega Mega Drive.png", "json": "Sega Mega Drive.json", "path": "/userdata/roms/megadrive/"},
     {"name": "GBC世嘉掌机", "image": "Game Boy Color.png", "json": "Game Boy Color.json", "path": "/userdata/roms/gbc/"},
     {"name": "GBA模拟游戏", "image": "Game Boy.png", "json": "Nintendo Game Boy Advance.json", "path": "/userdata/roms/gba/"},
+    {"name": "NGO 街机游戏", "image": "Neo-Geo.png", "json": "Neo-Geo.json", "path": "/userdata/roms/neogeo/"},
     {"name": "PS1经典游戏", "image": "Sony Playstation.png", "json": "Sony Playstation.json", "path": "/userdata/roms/psx/"},
     {"name": "PSP掌机游戏", "image": "Sony PSP.png", "json": "Sony PSP.json", "path": "/userdata/roms/psp/"},
     {"name": "PS2经典游戏", "image": "Sony Playstation 2.png", "json": "Sony Playstation 2.json", "path": "/userdata/roms/ps2/"}
