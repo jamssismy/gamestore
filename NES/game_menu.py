@@ -27,7 +27,7 @@ def download_worker():
 def start_download_threads():
     global _worker_started
     if not _worker_started:
-        for _ in range(3): 
+        for _ in range(5): 
             t = threading.Thread(target=download_worker, daemon=True)
             t.start()
         _worker_started = True
@@ -57,16 +57,26 @@ def game_menu(screen, font, active_mappings, json_file, save_dir):
     if not os.path.exists(save_dir):
         try: os.makedirs(save_dir)
         except Exception as e: log_message(f"错误: 无法创建目录 {save_dir} - {str(e)}")
-
+        
     menu_items = []
     try:
         if os.path.exists(json_file):
             with open(json_file, "r", encoding="utf-8") as f:
                 raw_games = json.load(f)
+                
+                # --- 就在这个循环里进行修改 ---
                 for g in raw_games:
                     filename = g[0]
+                    
+                    # 1. 提取原始名称
+                    display_name = filename.replace(".zip", "")
+                    
+                    # 2. 这里的片段执行缩短逻辑 (新增部分)
+                    if len(display_name) > 20: 
+                        display_name = display_name[:18] + "..."
+                    
                     menu_items.append({
-                        "name": filename.replace(".zip", ""),
+                        "name": display_name,  # 修改后的名字存入这里用于显示
                         "filename": filename,
                         "url": g[1],
                         "save_dir": save_dir,
