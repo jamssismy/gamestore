@@ -62,15 +62,17 @@ def create_slot_surface(img_path, slot_w, slot_h, scale_inner=0.85):
 
 # --- 完整的游戏分类配置 (绝对不删减) ---
 GAME_CONFIGS = [
-    {"name": "FC任天堂游戏", "image": "Nintendo Entertainment System.png", "json": "Nintendo Entertainment System.json", "path": "/userdata/roms/nes/"},
-    {"name": "SEGA世嘉游戏", "image": "Sega Mega Drive.png", "json": "Sega Mega Drive.json", "path": "/userdata/roms/megadrive/"},
+    {"name": "任天堂游戏(8位)", "image": "Nintendo Entertainment System.png", "json": "Nintendo Entertainment System.json", "path": "/userdata/roms/nes/"},
+    {"name": "Sega Master(8位)", "image": "Sega Mark III.png", "json": "Sega Mark III.json", "path": "/userdata/roms/mastersystem/"},
+    {"name": "NEC SuperGrafx(8位)", "image": "NEC PC Engine SuperGrafx.png", "json": "NEC PC Engine SuperGrafx.json", "path": "/userdata/roms/supergrafx/"},
+    {"name": "SFC超级任天堂(16位)", "image": "Super Nintendo Entertainment System.png", "json": "Super Nintendo Entertainment System.json", "path": "/userdata/roms/sfc/"},
+    {"name": "PC Engine 游戏(16位)", "image": "NEC PC Engine.png", "json": "NEC PC Engine.json", "path": "/userdata/roms/pcengine/"},
+    {"name": "SEGA世嘉游戏(16位)", "image": "Sega Mega Drive.png", "json": "Sega Mega Drive.json", "path": "/userdata/roms/megadrive/"},
     {"name": "GBC世嘉掌机", "image": "Game Boy Color.png", "json": "Game Boy Color.json", "path": "/userdata/roms/gbc/"},
     {"name": "GBA模拟游戏", "image": "Game Boy.png", "json": "Game Boy.json", "path": "/userdata/roms/gba/"},
     {"name": "PS1经典游戏", "image": "Sony Playstation.png", "json": "Sony Playstation.json", "path": "/userdata/roms/psx/"},
     {"name": "PSP掌机游戏", "image": "Sony PSP.png", "json": "Sony PSP.json", "path": "/userdata/roms/psp/"},
-    {"name": "PC Engine 游戏", "image": "NEC PC Engine.png", "json": "NEC PC Engine.json", "path": "/userdata/roms/pcengine/"},
-    {"name": "PS2经典游戏", "image": "Sony Playstation 2.png", "json": "Sony Playstation 2.json", "path": "/userdata/roms/ps2/"},
-    {"name": "Sega 八位机", "image": "Sega Mark III.png", "json": "Sega Mark III.json", "path": "/userdata/roms/mastersystem/"}
+    {"name": "PS2经典游戏", "image": "Sony Playstation 2.png", "json": "Sony Playstation 2.json", "path": "/userdata/roms/ps2/"}
 ]
 
 # 启动时预渲染所有图标
