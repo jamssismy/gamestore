@@ -67,7 +67,7 @@ GAME_CONFIGS = [
     {"name": "NEC SuperGrafx(8位)", "image": "NEC PC Engine SuperGrafx.png", "json": "NEC PC Engine SuperGrafx.json", "path": "/userdata/roms/supergrafx/"},
     {"name": "SFC超级任天堂(16位)", "image": "Super Nintendo Entertainment System.png", "json": "Super Nintendo Entertainment System.json", "path": "/userdata/roms/sfc/"},
     {"name": "PC Engine 游戏(16位)", "image": "NEC PC Engine.png", "json": "NEC PC Engine.json", "path": "/userdata/roms/pcengine/"},
-    {"name": "SEGA世嘉游戏(16位)", "image": "Sega Mega Drive.png", "json": "Sega Mega Drive.json", "path": "/userdata/roms/megadrive/"},
+    {"name": "SEGA世嘉游戏(16位)", "image": "Sega Mega Drive.png", "json": "Mega Drive.json", "path": "/userdata/roms/megadrive/"},
     {"name": "GBC世嘉掌机", "image": "Game Boy Color.png", "json": "Game Boy Color.json", "path": "/userdata/roms/gbc/"},
     {"name": "GBA模拟游戏", "image": "Game Boy.png", "json": "Nintendo Game Boy Advance.json", "path": "/userdata/roms/gba/"},
     {"name": "NGO 街机游戏", "image": "Neo-Geo.png", "json": "Neo-Geo.json", "path": "/userdata/roms/neogeo/"},
