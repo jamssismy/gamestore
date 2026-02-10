@@ -1,5 +1,5 @@
 {
-  "latest_version": "v1.06",
+  "latest_version": "v1.07",
   "download_url": "https://github.com/jamssismy/gamestore/archive/refs/heads/main.zip",
-  "changelog": "1. 修复MD游戏列表\n2. 优化游戏名长度\n3. 修正下载功能速度"
+  "changelog": "新增：可以通过 清理缓存 功能，清理本机 retroarch 文件夹，此功能用于删除模拟器缓存。应用于模拟器打不开原本可以打开的游戏的情况！"
 }
