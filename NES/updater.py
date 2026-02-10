@@ -47,6 +47,7 @@ def check_update():
                 return True, remote_ver, data.get("changelog", ""), data.get("download_url", "")
     except Exception as e:
         log_message(f"检查更新失败: {e}")
+    # --- 修复点：确保失败时也返回 4 个值，防止主程序崩溃 ---
     return False, None, None, None
 
 

@@ -60,6 +60,21 @@ def create_slot_surface(img_path, slot_w, slot_h, scale_inner=0.85):
         except: pass
     return slot_surf
 
+# --- 新增：文本换行工具函数 (修复崩溃的关键) ---
+def wrap_text(text, font, max_width):
+    if not text: return ["无更新说明"]
+    lines = []
+    current_line = ""
+    for char in str(text):
+        test_line = current_line + char
+        if font.size(test_line)[0] <= max_width:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = char
+    lines.append(current_line)
+    return lines
+
 # --- 完整的游戏分类配置 (绝对不删减) ---
 GAME_CONFIGS = [
     {"name": "任天堂游戏(8位)", "image": "Nintendo Entertainment System.png", "json": "Nintendo Entertainment System.json", "path": "/userdata/roms/nes/"},
@@ -112,10 +127,14 @@ def show_update_dialog(screen, version, changelog):
         pygame.draw.rect(screen, (0, 150, 255), (dx, dy, dw, dh), 3, border_radius=15)
         title = dialog_font.render(f"发现新版本: {version}", True, (255, 215, 0))
         screen.blit(title, (SW//2 - title.get_width()//2, dy + 30))
-        lines = changelog.split('\n')
-        for i, line in enumerate(lines[:8]):
+        
+        max_text_width = dw - 80
+        wrapped_lines = wrap_text(changelog, log_font, max_text_width)
+
+        for i, line in enumerate(wrapped_lines[:8]):
             line_surf = log_font.render(line, True, (200, 200, 200))
             screen.blit(line_surf, (dx + 40, dy + 100 + i * 35))
+        
         hint = hint_font.render("A: 立即更新    B: 稍后再说", True, (255, 255, 255))
         screen.blit(hint, (SW//2 - hint.get_width()//2, dy + dh - 60))
         pygame.display.flip()
@@ -246,7 +265,6 @@ while running:
                 has_upd, rem_ver, logs, url = updater.check_update()
                 if has_upd:
                     if show_update_dialog(screen, rem_ver, logs):
-                        # 触发安装时的动态提示
                         notif_text = "正在安装更新，请勿断电..."; notif_timer = pygame.time.get_ticks()
                         screen.fill((20, 25, 35))
                         msg = title_font.render(notif_text, True, (255, 215, 0))
