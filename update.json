@@ -1,0 +1,5 @@
+{
+  "latest_version": "v1.09",
+  "download_url": "https://github.com/jamssismy/gamestore/archive/refs/heads/main.zip",
+  "changelog": "1.增加手柄连接优化。2.修复线程下载逻辑。3.优化缓存清理逻辑。"
+}
